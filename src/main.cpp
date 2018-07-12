@@ -28,6 +28,9 @@
 
 #include <QDir>
 
+#include <QtPlugin>
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+
 static void initLogger()
 {
     QString logPath = QDir::tempPath() + QDir::separator() + "heimer.log";

@@ -72,6 +72,12 @@ find_package(Qt5Widgets ${QT_MIN_VER} REQUIRED)
 find_package(Qt5LinguistTools ${QT_MIN_VER} REQUIRED)
 find_package(Qt5Test ${QT_MIN_VER} REQUIRED)
 
+foreach(plugin ${Qt5Gui_PLUGINS})
+    get_target_property(_loc ${plugin} LOCATION)
+    message("Plugin ${plugin} is at location ${_loc}")
+    set(qt5_plugin_libs ${plugin_libs} ${_loc})
+endforeach()
+
 # Install paths depend on the build type and target platform
 setup_install_targets()
 
