@@ -11,14 +11,16 @@ set(SRC
     edge_dot.cpp
     edge_point.hpp
     edge_text_edit.cpp
+    editor_data.cpp
+    editor_scene.cpp
+    editor_view.cpp
     file_exception.hpp
     graph.cpp
     graphics_factory.cpp
     hash_seed.cpp
-    editor_data.cpp
-    editor_scene.cpp
-    editor_view.cpp
-    png_export_dialog.cpp
+    layers.hpp
+    layout_optimization_dialog.cpp
+    layout_optimizer.cpp
     main.cpp
     main_window.cpp
     magic_zoom.cpp
@@ -29,13 +31,13 @@ set(SRC
     node.cpp
     node_base.cpp
     node_handle.cpp
+    png_export_dialog.cpp
     reader.cpp
     serializer.cpp
     state_machine.cpp
     text_edit.cpp
     undo_stack.cpp
     user_exception.hpp
-    layers.hpp
     writer.cpp
 )
 

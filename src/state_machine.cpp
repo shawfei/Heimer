@@ -76,12 +76,13 @@ void StateMachine::calculateState(StateMachine::Action action)
 
     case Action::BackgroundColorChanged:
     case Action::EdgeColorChanged:
-    case Action::PngExported:
-    case Action::NewMindMapInitialized:
-    case Action::NotSavedDialogCanceled:
+    case Action::LayoutOptimized:
     case Action::MindMapOpened:
     case Action::MindMapSaveFailed:
     case Action::MindMapSaveAsFailed:
+    case Action::NewMindMapInitialized:
+    case Action::NotSavedDialogCanceled:
+    case Action::PngExported:
         m_quitType = QuitType::None;
         m_state = State::Edit;
         break;
@@ -128,6 +129,10 @@ void StateMachine::calculateState(StateMachine::Action action)
 
     case Action::SaveAsSelected:
         m_state = State::ShowSaveAsDialog;
+        break;
+
+    case Action::LayoutOptimizationRequested:
+        m_state = State::ShowLayoutOptimizationDialog;
         break;
 
     default:

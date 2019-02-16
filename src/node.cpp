@@ -65,7 +65,7 @@ Node::Node()
     m_handleVisibilityTimer.setSingleShot(true);
     m_handleVisibilityTimer.setInterval(2000);
 
-    connect(&m_handleVisibilityTimer, &QTimer::timeout, [=] () {
+    connect(&m_handleVisibilityTimer, &QTimer::timeout, [=] {
         setHandlesVisible(false, false);
     });
 }

@@ -18,6 +18,8 @@
 #include "editor_data.hpp"
 #include "editor_scene.hpp"
 #include "editor_view.hpp"
+#include "layout_optimization_dialog.hpp"
+#include "layout_optimizer.hpp"
 #include "main_window.hpp"
 #include "mediator.hpp"
 #include "png_export_dialog.hpp"
@@ -108,7 +110,9 @@ Application::Application(int & argc, char ** argv)
     m_editorData.reset(new EditorData);
     m_editorScene.reset(new EditorScene);
     m_editorView = new EditorView(*m_mediator);
+
     m_pngExportDialog.reset(new PngExportDialog(*m_mainWindow));
+    connect(m_pngExportDialog.get(), &PngExportDialog::pngExportRequested, m_mediator.get(), &Mediator::exportToPNG);
 
     m_mainWindow->setMediator(m_mediator);
     m_stateMachine->setMediator(m_mediator);
@@ -126,8 +130,6 @@ Application::Application(int & argc, char ** argv)
     connect(m_editorData.get(), &EditorData::isModifiedChanged, [=] (bool isModified) {
         m_mainWindow->enableSave(isModified && m_mediator->canBeSaved());
     });
-
-    connect(m_pngExportDialog.get(), &PngExportDialog::pngExportRequested, m_mediator.get(), &Mediator::exportToPNG);
 
     connect(m_mediator.get(), &Mediator::exportFinished, m_pngExportDialog.get(), &PngExportDialog::finishExport);
     connect(m_mainWindow.get(), &MainWindow::cornerRadiusChanged, m_mediator.get(), &Mediator::setCornerRadius);
@@ -154,8 +156,8 @@ QString Application::getFileDialogFileText() const
 QString Application::loadRecentPath() const
 {
     QSettings settings;
-    settings.beginGroup(m_settingsGroup);
-    const auto path = settings.value("recentPath", QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
+    settings.beginGroup(Constants::Application::QSETTINGS_GROUP);
+    const auto path = settings.value(Constants::Application::QSETTINGS_RECENT_PATH_KEY, QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
     settings.endGroup();
     return path;
 }
@@ -195,6 +197,9 @@ void Application::runState(StateMachine::State state)
         break;
     case StateMachine::State::ShowPngExportDialog:
         showPngExportDialog();
+        break;
+    case StateMachine::State::ShowLayoutOptimizationDialog:
+        showLayoutOptimizationDialog();
         break;
     case StateMachine::State::ShowNotSavedDialog:
         switch (showNotSavedDialog())
@@ -312,8 +317,8 @@ void Application::saveMindMapAs()
 void Application::saveRecentPath(QString fileName)
 {
     QSettings settings;
-    settings.beginGroup(m_settingsGroup);
-    settings.setValue("recentPath", fileName);
+    settings.beginGroup(Constants::Application::QSETTINGS_GROUP);
+    settings.setValue(Constants::Application::QSETTINGS_RECENT_PATH_KEY, fileName);
     settings.endGroup();
 }
 
@@ -342,6 +347,20 @@ void Application::showPngExportDialog()
 
     // Doesn't matter if canceled or not
     emit actionTriggered(StateMachine::Action::PngExported);
+}
+
+void Application::showLayoutOptimizationDialog()
+{
+    LayoutOptimizer layoutOptimizer{m_mediator->mindMapData()};
+    LayoutOptimizationDialog dialog{*m_mainWindow, layoutOptimizer};
+    connect(&dialog, &LayoutOptimizationDialog::undoPointRequested, m_mediator.get(), &Mediator::saveUndoPoint);
+
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        m_mediator->zoomToFit();
+    }
+
+    emit actionTriggered(StateMachine::Action::LayoutOptimized);
 }
 
 void Application::showMessageBox(QString message)

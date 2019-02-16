@@ -62,7 +62,7 @@ EditorView::EditorView(Mediator & mediator)
 void EditorView::createBackgroundContextMenuActions()
 {
     auto setBackgroundColorAction = new QAction(tr("Set background color"), &m_backgroundContextMenu);
-    QObject::connect(setBackgroundColorAction, &QAction::triggered, [this] () {
+    QObject::connect(setBackgroundColorAction, &QAction::triggered, [=] {
         emit actionTriggered(StateMachine::Action::BackgroundColorChangeRequested);
     });
 
@@ -70,7 +70,7 @@ void EditorView::createBackgroundContextMenuActions()
     m_backgroundContextMenu.addSeparator();
 
     auto setEdgeColorAction = new QAction(tr("Set edge color"), &m_backgroundContextMenu);
-    QObject::connect(setEdgeColorAction, &QAction::triggered, [this] () {
+    QObject::connect(setEdgeColorAction, &QAction::triggered, [=] {
         emit actionTriggered(StateMachine::Action::EdgeColorChangeRequested);
     });
 
@@ -78,7 +78,7 @@ void EditorView::createBackgroundContextMenuActions()
     m_backgroundContextMenu.addSeparator();
 
     auto createNode = new QAction(tr("Create floating node"), &m_backgroundContextMenu);
-    QObject::connect(createNode, &QAction::triggered, [this] () {
+    QObject::connect(createNode, &QAction::triggered, [=] {
         emit newNodeRequested(snapToGrid(m_clickedScenePos));
     });
 
@@ -155,7 +155,7 @@ void EditorView::createEdgeContextMenuActions()
 void EditorView::createNodeContextMenuActions()
 {
     m_setNodeColorAction = new QAction(tr("Set node color"), &m_nodeContextMenu);
-    QObject::connect(m_setNodeColorAction, &QAction::triggered, [this] () {
+    QObject::connect(m_setNodeColorAction, &QAction::triggered, [=] {
         auto node = m_mediator.selectedNode();
         const auto color = QColorDialog::getColor(Qt::white, this);
         if (color.isValid()) {
@@ -165,7 +165,7 @@ void EditorView::createNodeContextMenuActions()
     });
 
     m_setNodeTextColorAction = new QAction(tr("Set text color"), &m_nodeContextMenu);
-    QObject::connect(m_setNodeTextColorAction, &QAction::triggered, [this] () {
+    QObject::connect(m_setNodeTextColorAction, &QAction::triggered, [=] {
         auto node = m_mediator.selectedNode();
         const auto color = QColorDialog::getColor(Qt::white, this);
         if (color.isValid()) {
@@ -175,7 +175,7 @@ void EditorView::createNodeContextMenuActions()
     });
 
     m_deleteNodeAction = new QAction(tr("Delete node"), &m_nodeContextMenu);
-    QObject::connect(m_deleteNodeAction, &QAction::triggered, [this] () {
+    QObject::connect(m_deleteNodeAction, &QAction::triggered, [=] {
         m_mediator.setSelectedNode(nullptr);
         m_mediator.saveUndoPoint();
         // Use a separate variable and timer here because closing the menu will always nullify the selected edge

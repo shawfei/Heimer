@@ -34,6 +34,10 @@ static constexpr auto QSETTINGS_COMPANY_NAME = "Heimer";
 
 static constexpr auto WEB_SITE_URL = "http://juzzlin.github.io/Heimer";
 
+static constexpr auto QSETTINGS_GROUP = "Application";
+
+static constexpr auto QSETTINGS_RECENT_PATH_KEY = "recentPath";
+
 static constexpr auto QSETTINGS_SOFTWARE_NAME = APPLICATION_NAME;
 
 static constexpr auto SUPPORT_SITE_URL = "https://www.patreon.com/juzzlin";
@@ -125,6 +129,28 @@ static const int MIN_HEIGHT = 75;
 static const int MIN_WIDTH = 200;
 
 } // Node
+
+namespace LayoutOptimizer {
+
+static const int DEFAULT_MIN_EDGE_LENGTH = 100;
+
+static const int MIN_EDGE_LENGTH = 10;
+
+static const int MAX_EDGE_LENGTH = 250;
+
+static const double DEFAULT_ASPECT_RATIO = 1.0;
+
+static const double MIN_ASPECT_RATIO = 0.1;
+
+static const double MAX_ASPECT_RATIO = 10;
+
+static const auto QSETTINGS_GROUP = "LayoutOptimizer";
+
+static const auto QSETTINGS_ASPECT_RATIO_KEY = "aspectRatio";
+
+static const auto QSETTINGS_MIN_EDGE_LENGTH_KEY = "minEdgeLength";
+
+} // LayoutOptimizer
 
 namespace Scene {
 

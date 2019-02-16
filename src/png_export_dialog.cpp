@@ -36,7 +36,7 @@ PngExportDialog::PngExportDialog(QWidget & parent)
     setMinimumWidth(480);
     initWidgets();
 
-    connect(m_filenameButton, &QPushButton::clicked, [=] () {
+    connect(m_filenameButton, &QPushButton::clicked, [=] {
         auto filename = QFileDialog::getSaveFileName(this,
             tr("Export As"),
             QStandardPaths::writableLocation(QStandardPaths::HomeLocation),
@@ -47,7 +47,7 @@ PngExportDialog::PngExportDialog(QWidget & parent)
 
     connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::close);
 
-    connect(m_exportButton, &QPushButton::clicked, [=] () {
+    connect(m_exportButton, &QPushButton::clicked, [=] {
         m_exportButton->setEnabled(false);
         m_progressBar->setValue(50);
         emit pngExportRequested(m_filenameWithExtension, QSize(m_imageWidthSpinBox->value(), m_imageHeightSpinBox->value()), m_transparentBackgroundCheckBox->isChecked());
@@ -55,7 +55,7 @@ PngExportDialog::PngExportDialog(QWidget & parent)
 
     // The ugly cast is needed because there are QSpinBox::valueChanged(int) and QSpinBox::valueChanged(QString)
     // In Qt > 5.10 one can use QOverload<int>::of(...)
-    connect(m_imageWidthSpinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [&] (int value) {
+    connect(m_imageWidthSpinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=] (int value) {
         if (m_enableSpinBoxConnection) {
             m_enableSpinBoxConnection = false;
             m_imageHeightSpinBox->setValue(value / m_aspectRatio);
@@ -63,7 +63,7 @@ PngExportDialog::PngExportDialog(QWidget & parent)
         }
     });
 
-    connect(m_imageHeightSpinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [&] (int value) {
+    connect(m_imageHeightSpinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=] (int value) {
         if (m_enableSpinBoxConnection) {
             m_enableSpinBoxConnection = false;
             m_imageWidthSpinBox->setValue(value * m_aspectRatio);

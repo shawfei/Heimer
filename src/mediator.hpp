@@ -20,12 +20,14 @@
 #include <QPointF>
 #include <QString>
 
+#include "mind_map_data.hpp"
 #include "node.hpp"
 
 class MouseAction;
 class EditorData;
 class EditorScene;
 class EditorView;
+class Graph;
 class MainWindow;
 class QGraphicsItem;
 
@@ -98,6 +100,8 @@ public:
 
     void moveSelectionGroup(Node & reference, QPointF location);
 
+    MindMapDataPtr mindMapData() const;
+
     int nodeCount() const;
 
     bool openMindMap(QString fileName);
@@ -156,13 +160,13 @@ public slots:
 
     QSize zoomForExport();
 
+    void zoomToFit();
+
 private slots:
 
     void zoomIn();
 
     void zoomOut();
-
-    void zoomToFit();
 
 signals:
 

@@ -76,6 +76,8 @@ private:
 
     void showEdgeColorDialog();
 
+    void showLayoutOptimizationDialog();
+
     void showPngExportDialog();
 
     void showMessageBox(QString message);
@@ -91,8 +93,6 @@ private:
     QString m_mindMapFile;
 
     QString m_lang;
-
-    QString m_settingsGroup = "Application";
 
     std::unique_ptr<StateMachine> m_stateMachine;
 

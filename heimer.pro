@@ -36,6 +36,8 @@ HEADERS +=  \
     $$SRC/hash_seed.hpp \
     $$SRC/png_export_dialog.hpp \
     $$SRC/layers.hpp \
+    $$SRC/layout_optimization_dialog.hpp \
+    $$SRC/layout_optimizer.hpp \
     $$SRC/magic_zoom.hpp \
     $$SRC/main_window.hpp \
     $$SRC/mediator.hpp \
@@ -67,6 +69,8 @@ SOURCES += \
     $$SRC/editor_view.cpp \
     $$SRC/hash_seed.cpp \
     $$SRC/png_export_dialog.cpp \
+    $$SRC/layout_optimization_dialog.cpp \
+    $$SRC/layout_optimizer.cpp \
     $$SRC/magic_zoom.cpp \
     $$SRC/main.cpp \
     $$SRC/main_window.cpp \
