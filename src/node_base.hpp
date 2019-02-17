@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Heimer. If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NODEBASE_HPP
-#define NODEBASE_HPP
+#ifndef NODE_BASE_HPP
+#define NODE_BASE_HPP
 
 #include <QColor>
 #include <QRectF>
@@ -101,4 +101,4 @@ private:
 
 using NodeBasePtr = std::shared_ptr<NodeBase>;
 
-#endif // NODEBASE_HPP
+#endif // NODE_BASE_HPP
