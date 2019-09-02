@@ -39,6 +39,13 @@ static void writeColor(QDomElement & parent, QDomDocument & doc, QColor color, Q
     parent.appendChild(colorElement);
 }
 
+static void writeImageRef(QDomElement & parent, QDomDocument & doc, int imageRef, QString elementName)
+{
+    auto colorElement = doc.createElement(elementName);
+    colorElement.setAttribute(Serializer::DataKeywords::Design::Graph::Node::Image::REF, imageRef);
+    parent.appendChild(colorElement);
+}
+
 static void writeNodes(MindMapData & mindMapData, QDomElement & root, QDomDocument & doc)
 {
     for (auto node : mindMapData.graph().getNodes()) {
@@ -60,6 +67,11 @@ static void writeNodes(MindMapData & mindMapData, QDomElement & root, QDomDocume
 
         // Create a child node for text color
         writeColor(nodeElement, doc, node->textColor(), Serializer::DataKeywords::Design::Graph::Node::TEXT_COLOR);
+
+        // Create a child node for image ref
+        if (node->imageRef() >= 0) {
+            writeImageRef(nodeElement, doc, node->imageRef(), Serializer::DataKeywords::Design::Graph::Node::IMAGE);
+        }
     }
 }
 
@@ -81,6 +93,15 @@ static void writeEdges(MindMapData & mindMapData, QDomElement & root, QDomDocume
             auto textNode = doc.createTextNode(edge->text());
             textElement.appendChild(textNode);
         }
+    }
+}
+
+static void writeImages(MindMapData & mindMapData, QDomElement & root, QDomDocument & doc)
+{
+    for (auto && image : mindMapData.imageManager().images()) {
+        auto imageElement = doc.createElement(Serializer::DataKeywords::Design::IMAGE);
+        imageElement.setAttribute(Serializer::DataKeywords::Design::Image::ID, image.id);
+        root.appendChild(imageElement);
     }
 }
 
@@ -271,7 +292,10 @@ QDomDocument Serializer::toXml(MindMapData & mindMapData)
     design.appendChild(graph);
 
     writeNodes(mindMapData, graph, doc);
+
     writeEdges(mindMapData, graph, doc);
+
+    writeImages(mindMapData, design, doc);
 
     return doc;
 }

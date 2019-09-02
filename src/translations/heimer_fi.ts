@@ -32,47 +32,67 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../application.cpp" line="164"/>
+        <location filename="../application.cpp" line="166"/>
         <source>Heimer Files</source>
         <translation>Heimer -tiedostot</translation>
     </message>
     <message>
-        <location filename="../application.cpp" line="245"/>
+        <location filename="../application.cpp" line="241"/>
         <source>Open File</source>
         <translation>Avaa tiedosto</translation>
     </message>
     <message>
-        <location filename="../application.cpp" line="278"/>
+        <location filename="../application.cpp" line="274"/>
         <source>Failed to save file.</source>
         <translation>Tiedoston tallentaminen epäonnistui</translation>
     </message>
     <message>
-        <location filename="../application.cpp" line="296"/>
+        <location filename="../application.cpp" line="292"/>
         <source>Save File As</source>
         <translation>Tallenna Nimellä</translation>
     </message>
     <message>
-        <location filename="../application.cpp" line="312"/>
+        <location filename="../application.cpp" line="308"/>
         <source>File &apos;</source>
         <translation>Tiedosto &apos;</translation>
     </message>
     <message>
-        <location filename="../application.cpp" line="312"/>
+        <location filename="../application.cpp" line="308"/>
         <source>&apos; saved.</source>
         <translation>&apos; tallennettu.</translation>
     </message>
     <message>
-        <location filename="../application.cpp" line="318"/>
+        <location filename="../application.cpp" line="314"/>
         <source>Failed to save file as &apos;</source>
         <translation>Tietoston tallentaminen epäonnistui nimellä &apos;</translation>
     </message>
     <message>
-        <location filename="../application.cpp" line="370"/>
+        <location filename="../application.cpp" line="378"/>
+        <source>Open an image</source>
+        <translation>Avaa kuvatiedosto</translation>
+    </message>
+    <message>
+        <location filename="../application.cpp" line="378"/>
+        <source>Image Files</source>
+        <translation>Kuvatiedostot</translation>
+    </message>
+    <message>
+        <location filename="../application.cpp" line="388"/>
+        <source>Load image</source>
+        <translation>Kuvanlataus</translation>
+    </message>
+    <message>
+        <location filename="../application.cpp" line="388"/>
+        <source>Failed to load image &apos;</source>
+        <translation>Kuvan lataaminen epäonnistui: &apos;</translation>
+    </message>
+    <message>
+        <location filename="../application.cpp" line="411"/>
         <source>The mind map has been modified.</source>
         <translation>Käsitekarttaa on muokattu.</translation>
     </message>
     <message>
-        <location filename="../application.cpp" line="371"/>
+        <location filename="../application.cpp" line="412"/>
         <source>Do you want to save your changes?</source>
         <translation>Haluatko tallentaa muutokset?</translation>
     </message>
@@ -224,34 +244,39 @@
         <translation>Liimaa solmu</translation>
     </message>
     <message>
-        <location filename="../main_context_menu.cpp" line="53"/>
+        <location filename="../main_context_menu.cpp" line="51"/>
         <source>Set background color</source>
         <translation>Aseta taustaväri</translation>
     </message>
     <message>
-        <location filename="../main_context_menu.cpp" line="59"/>
+        <location filename="../main_context_menu.cpp" line="57"/>
         <source>Set edge color</source>
         <translation>Aseta kaaren väri</translation>
     </message>
     <message>
-        <location filename="../main_context_menu.cpp" line="65"/>
+        <location filename="../main_context_menu.cpp" line="63"/>
         <source>Create floating node</source>
         <translation>Luo kelluva solmu</translation>
     </message>
     <message>
-        <location filename="../main_context_menu.cpp" line="71"/>
+        <location filename="../main_context_menu.cpp" line="69"/>
         <source>Set node color</source>
         <translation>Aseta solmun väri</translation>
     </message>
     <message>
-        <location filename="../main_context_menu.cpp" line="82"/>
+        <location filename="../main_context_menu.cpp" line="80"/>
         <source>Set text color</source>
         <translation>Tekstin väri</translation>
     </message>
     <message>
-        <location filename="../main_context_menu.cpp" line="93"/>
+        <location filename="../main_context_menu.cpp" line="91"/>
         <source>Delete node</source>
         <translation>Poista solmu</translation>
+    </message>
+    <message>
+        <location filename="../main_context_menu.cpp" line="103"/>
+        <source>Attach image...</source>
+        <translation>Liitä kuva...</translation>
     </message>
 </context>
 <context>

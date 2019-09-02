@@ -99,6 +99,13 @@ MainContextMenu::MainContextMenu(QWidget * parent, Mediator & mediator, Grid & g
 
     m_mainContextMenuActions[Mode::Node].push_back(deleteNodeAction);
 
+    auto attachImageAction(new QAction(tr("Attach image..."), this));
+    QObject::connect(attachImageAction, &QAction::triggered, [this] {
+        emit actionTriggered(StateMachine::Action::ImageAttachmentRequested, m_selectedNode);
+    });
+
+    m_mainContextMenuActions[Mode::Node].push_back(deleteNodeAction);
+
     // Populate the menu
     addAction(m_copyNodeAction);
     addAction(m_pasteNodeAction);
@@ -113,6 +120,8 @@ MainContextMenu::MainContextMenu(QWidget * parent, Mediator & mediator, Grid & g
     addAction(setNodeTextColorAction);
     addSeparator();
     addAction(deleteNodeAction);
+    addSeparator();
+    addAction(attachImageAction);
 
     connect(this, &QMenu::aboutToShow, [=] {
         m_selectedNode = m_mediator.selectedNode();

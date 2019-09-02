@@ -131,6 +131,16 @@ const Graph & MindMapData::graph() const
     return m_graph;
 }
 
+ImageManager & MindMapData::imageManager()
+{
+    return m_imageManager;
+}
+
+const ImageManager & MindMapData::imageManager() const
+{
+    return m_imageManager;
+}
+
 int MindMapData::textSize() const
 {
     return m_textSize;

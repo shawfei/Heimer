@@ -18,6 +18,7 @@
 #include "constants.hpp"
 #include "edge.hpp"
 #include "graphics_factory.hpp"
+#include "image.hpp"
 #include "layers.hpp"
 #include "node_handle.hpp"
 #include "text_edit.hpp"
@@ -26,6 +27,7 @@
 
 #include <QGraphicsDropShadowEffect>
 #include <QGraphicsSceneHoverEvent>
+#include <QImage>
 #include <QPainter>
 #include <QPen>
 #include <QVector2D>
@@ -74,6 +76,8 @@ Node::Node(const Node & other)
     setColor(other.color());
 
     setCornerRadius(other.cornerRadius());
+
+    setImageRef(other.imageRef());
 
     setIndex(other.index());
 
@@ -304,10 +308,39 @@ void Node::paint(QPainter * painter,
     // Background
 
     QPainterPath path;
-    QRectF rect(-size().width() / 2, -size().height() / 2, size().width(), size().height());
+    const QRectF rect(-size().width() / 2, -size().height() / 2, size().width(), size().height());
     path.addRoundedRect(rect, cornerRadius(), cornerRadius());
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->fillPath(path, QBrush(color()));
+
+    if (!m_pixmap.isNull()) {
+        QPixmap scaledPixmap(static_cast<int>(size().width()), static_cast<int>(size().height()));
+        scaledPixmap.fill(Qt::transparent);
+        QPainter pixmapPainter(&scaledPixmap);
+        QPainterPath scaledPath;
+        const QRectF scaledRect(0, 0, size().width(), size().height());
+        scaledPath.addRoundedRect(scaledRect, cornerRadius(), cornerRadius());
+
+        const auto pixmapAspect = static_cast<double>(m_pixmap.width()) / m_pixmap.height();
+        const auto nodeAspect = size().width() / size().height();
+        if (nodeAspect > 1.0) {
+            if (pixmapAspect > nodeAspect) {
+                pixmapPainter.fillPath(scaledPath, QBrush(m_pixmap.scaledToHeight(static_cast<int>(size().height()))));
+            } else {
+                pixmapPainter.fillPath(scaledPath, QBrush(m_pixmap.scaledToWidth(static_cast<int>(size().width()))));
+            }
+        } else {
+            if (pixmapAspect < nodeAspect) {
+                pixmapPainter.fillPath(scaledPath, QBrush(m_pixmap.scaledToWidth(static_cast<int>(size().width()))));
+            } else {
+                pixmapPainter.fillPath(scaledPath, QBrush(m_pixmap.scaledToHeight(static_cast<int>(size().height()))));
+            }
+        }
+
+        painter->drawPixmap(rect, scaledPixmap, scaledRect);
+    } else {
+        painter->fillPath(path, QBrush(color()));
+    }
+
     painter->restore();
 }
 
@@ -409,6 +442,20 @@ void Node::setTextSize(int textSize)
 QString Node::text() const
 {
     return m_textEdit->text();
+}
+
+void Node::setImageRef(int imageRef)
+{
+    NodeBase::setImageRef(imageRef);
+
+    emit imageRequested(imageRef, *this);
+}
+
+void Node::applyImage(const Image & image)
+{
+    m_pixmap = QPixmap::fromImage(image.image);
+
+    update();
 }
 
 void Node::updateEdgeLines()
