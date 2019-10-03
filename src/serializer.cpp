@@ -26,6 +26,92 @@
 
 #include <QDomElement>
 
+namespace Serializer {
+namespace DataKeywords {
+namespace Design {
+
+static constexpr auto DESIGN = "design";
+
+static constexpr auto APPLICATION_VERSION = "version";
+
+static constexpr auto COLOR = "color";
+
+static constexpr auto CORNER_RADIUS = "corner-radius";
+
+static constexpr auto EDGE_COLOR = "edge-color";
+
+static constexpr auto EDGE_THICKNESS = "edge-width";
+
+static constexpr auto GRAPH = "graph";
+
+static constexpr auto IMAGE = "image";
+
+static constexpr auto TEXT_SIZE = "text-size";
+
+// Used for Design and Node
+namespace Color {
+
+static constexpr auto R = "r";
+
+static constexpr auto G = "g";
+
+static constexpr auto B = "b";
+} // namespace Color
+
+namespace Graph {
+
+static constexpr auto NODE = "node";
+
+namespace Node {
+
+static constexpr auto COLOR = "color";
+
+static constexpr auto IMAGE = "image";
+
+static constexpr auto INDEX = "index";
+
+static constexpr auto TEXT = "text";
+
+static constexpr auto TEXT_COLOR = "text-color";
+
+static constexpr auto X = "x";
+
+static constexpr auto Y = "y";
+
+static constexpr auto W = "w";
+
+static constexpr auto H = "h";
+
+namespace Image {
+
+static constexpr auto REF = "ref";
+} // namespace Image
+} // namespace Node
+
+static constexpr auto EDGE = "edge";
+
+namespace Edge {
+
+static constexpr auto INDEX0 = "index0";
+
+static constexpr auto INDEX1 = "index1";
+
+static constexpr auto ARROW_MODE = "arrow-mode";
+
+static constexpr auto REVERSED = "reversed";
+
+} // namespace Edge
+} // namespace Graph
+
+namespace Image {
+
+static constexpr auto ID = "id";
+
+} // namespace Image
+} // namespace Design
+
+} // namespace DataKeywords
+
 static const double SCALE = 1000; // https://bugreports.qt.io/browse/QTBUG-67129
 
 using std::make_shared;
@@ -233,7 +319,7 @@ static void readGraph(const QDomElement & graph, MindMapDataPtr data)
                         });
 }
 
-MindMapDataPtr Serializer::fromXml(QDomDocument document)
+MindMapDataPtr fromXml(QDomDocument document)
 {
     const auto design = document.documentElement();
 
@@ -262,7 +348,7 @@ MindMapDataPtr Serializer::fromXml(QDomDocument document)
     return data;
 }
 
-QDomDocument Serializer::toXml(MindMapData & mindMapData)
+QDomDocument toXml(MindMapData & mindMapData)
 {
     QDomDocument doc;
 
@@ -299,3 +385,5 @@ QDomDocument Serializer::toXml(MindMapData & mindMapData)
 
     return doc;
 }
+
+} // namespace Serializer
