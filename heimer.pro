@@ -2,10 +2,10 @@
 # (there are problems with static Qt and CMake)
 
 TEMPLATE = app
-TARGET   = heimer
+TARGET = heimer
 
-DEFINES += VERSION=\\\"1.11.0\\\"
-QMAKE_CXXFLAGS += -std=gnu++11
+DEFINES += VERSION=\\\"1.15.1\\\"
+CONFIG += c++11 lrelease embed_translations
 
 # Qt version check
 contains(QT_VERSION, ^5\\..*) {
@@ -17,7 +17,7 @@ contains(QT_VERSION, ^5\\..*) {
 
 SRC = src
 
-INCLUDEPATH += . $$SRC/contrib/SimpleLogger/src
+INCLUDEPATH += . $$SRC/contrib/SimpleLogger/src $$SRC/contrib/Argengine/src
 
 # Input
 HEADERS +=  \
@@ -37,6 +37,8 @@ HEADERS +=  \
     $$SRC/editor_view.hpp \
     $$SRC/file_exception.hpp \
     $$SRC/hash_seed.hpp \
+    $$SRC/image.hpp \
+    $$SRC/image_manager.hpp \
     $$SRC/png_export_dialog.hpp \
     $$SRC/layers.hpp \
     $$SRC/magic_zoom.hpp \
@@ -50,12 +52,16 @@ HEADERS +=  \
     $$SRC/node_base.hpp \
     $$SRC/node_handle.hpp \
     $$SRC/reader.hpp \
+    $$SRC/recent_files_manager.hpp \
+    $$SRC/recent_files_menu.hpp \
     $$SRC/selection_group.hpp \
     $$SRC/serializer.hpp \
     $$SRC/state_machine.hpp \
     $$SRC/text_edit.hpp \
     $$SRC/undo_stack.hpp \
+    $$SRC/whats_new_dlg.hpp \
     $$SRC/writer.hpp \
+    $$SRC/contrib/Argengine/src/argengine.hpp \
     $$SRC/contrib/SimpleLogger/src/simple_logger.hpp \
 
 SOURCES += \
@@ -74,6 +80,8 @@ SOURCES += \
     $$SRC/editor_scene.cpp \
     $$SRC/editor_view.cpp \
     $$SRC/hash_seed.cpp \
+    $$SRC/image.cpp \
+    $$SRC/image_manager.cpp \
     $$SRC/png_export_dialog.cpp \
     $$SRC/magic_zoom.cpp \
     $$SRC/main.cpp \
@@ -87,16 +95,26 @@ SOURCES += \
     $$SRC/node_base.cpp \
     $$SRC/node_handle.cpp \
     $$SRC/reader.cpp \
+    $$SRC/recent_files_manager.cpp \
+    $$SRC/recent_files_menu.cpp \
     $$SRC/selection_group.cpp \
     $$SRC/serializer.cpp \
     $$SRC/state_machine.cpp \
     $$SRC/text_edit.cpp \
     $$SRC/undo_stack.cpp \
+    $$SRC/whats_new_dlg.cpp \
     $$SRC/writer.cpp \
+    $$SRC/contrib/Argengine/src/argengine.cpp \
     $$SRC/contrib/SimpleLogger/src/simple_logger.cpp \
 
+QM_FILES_RESOURCE_PREFIX = /translations
 
-RESOURCES += data/icons/icons.qrc data/images/images.qrc data/translations/translations.qrc
+TRANSLATIONS += \ 
+$$SRC/translations/heimer_fi.ts \ 
+$$SRC/translations/heimer_fr.ts \ 
+$$SRC/translations/heimer_it.ts 
+
+RESOURCES += meta.qrc data/icons/icons.qrc data/images/images.qrc
 RC_FILE = data/icons/WindowsHeimer.rc
 
 data.files = AUTHORS CHANGELOG COPYING README

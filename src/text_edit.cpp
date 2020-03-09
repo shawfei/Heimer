@@ -65,35 +65,14 @@ void TextEdit::setText(const QString & text)
     setPlainText(text);
 }
 
-double TextEdit::maxHeight() const
-{
-    return m_maxHeight;
-}
-
-void TextEdit::setMaxHeight(double maxHeight)
-{
-    m_maxHeight = maxHeight;
-}
-
-double TextEdit::maxWidth() const
-{
-    return m_maxWidth;
-}
-
 void TextEdit::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
-    QStyleOptionGraphicsItem * style = const_cast<QStyleOptionGraphicsItem *>(option);
-
     // Remove the HasFocus style state, to prevent the dotted line from being drawn.
+    auto style = const_cast<QStyleOptionGraphicsItem *>(option);
     style->state &= ~QStyle::State_HasFocus;
 
     painter->fillRect(option->rect, m_backgroundColor);
     QGraphicsTextItem::paint(painter, style, widget);
-}
-
-void TextEdit::focusInEvent(QFocusEvent * event)
-{
-    QGraphicsTextItem::focusInEvent(event);
 }
 
 void TextEdit::setBackgroundColor(const QColor & backgroundColor)
@@ -101,11 +80,6 @@ void TextEdit::setBackgroundColor(const QColor & backgroundColor)
     m_backgroundColor = backgroundColor;
 
     update();
-}
-
-void TextEdit::setMaxWidth(double maxWidth)
-{
-    m_maxWidth = maxWidth;
 }
 
 void TextEdit::setTextSize(int textSize)

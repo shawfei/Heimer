@@ -33,9 +33,11 @@ public:
         Exit,
         Init,
         InitializeNewMindMap,
-        SaveMindMap,
+        OpenRecent,
+        Save,
         ShowBackgroundColorDialog,
         ShowEdgeColorDialog,
+        ShowImageFileDialog,
         ShowNotSavedDialog,
         ShowOpenDialog,
         ShowPngExportDialog,
@@ -49,6 +51,8 @@ public:
         BackgroundColorChangeRequested,
         EdgeColorChanged,
         EdgeColorChangeRequested,
+        ImageAttachmentRequested,
+        ImageLoadFailed,
         MainWindowInitialized,
         MindMapOpened,
         MindMapSaved,
@@ -60,15 +64,16 @@ public:
         NotSavedDialogAccepted,
         NotSavedDialogCanceled,
         NotSavedDialogDiscarded,
-        PngExported,
-        PngExportSelected,
         OpeningMindMapFailed,
         OpenSelected,
+        PngExported,
+        PngExportSelected,
         QuitSelected,
-        SaveSelected,
+        RecentFileSelected,
+        RedoSelected,
         SaveAsSelected,
-        UndoSelected,
-        RedoSelected
+        SaveSelected,
+        UndoSelected
     };
 
     enum class QuitType
@@ -76,6 +81,7 @@ public:
         None,
         New,
         Open,
+        OpenRecent,
         Close
     };
 

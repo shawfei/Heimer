@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent none
     stages {
         stage('CMake Debug build and unit tests') {
             agent {
@@ -62,10 +62,10 @@ pipeline {
                 }
             }
         }
-        stage('NSIS installer') {
+        stage('Build NSIS installer') {
             agent {
                 docker {
-                    image 'juzzlin/mxe-qt5:latest'
+                    image 'juzzlin/mxe-qt5-18.04:latest'
                     args '--privileged -t -v $WORKSPACE:/heimer'
                 }
             }
@@ -78,6 +78,17 @@ pipeline {
                 }
             }
 
+        }
+        stage('Build AppImage') {
+            agent any
+            steps {
+                sh "./scripts/build-app-image"
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'build-appimage/*.AppImage', fingerprint: true
+                }
+            }
         }
     }
 }

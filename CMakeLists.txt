@@ -19,10 +19,10 @@ if(POLICY CMP0071)
     cmake_policy(SET CMP0071 NEW)
 endif()
 
-# Global game version
-set(VERSION_MAJOR "1")
-set(VERSION_MINOR "11")
-set(VERSION_PATCH "0")
+# Global version
+set(VERSION_MAJOR 1)
+set(VERSION_MINOR 15)
+set(VERSION_PATCH 1)
 set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
 # Some common CPack variables

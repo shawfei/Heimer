@@ -78,7 +78,7 @@ protected:
 
 signals:
 
-    void actionTriggered(StateMachine::Action action);
+    void actionTriggered(StateMachine::Action action, Node * node = nullptr);
 
     void newNodeRequested(QPointF position);
 
@@ -108,6 +108,8 @@ private:
     void handleRightButtonClickOnNode(Node & node);
 
     void initiateNewNodeDrag(NodeHandle & nodeHandle);
+
+    void initiateNodeDrag(Node & node);
 
     void initiateRubberBand();
 

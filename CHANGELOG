@@ -7,6 +7,73 @@ Bug fixes:
 
 Other:
 
+1.15.1
+======
+
+Other:
+
+* Update Italian translations
+* Use Argengine as the CLI argument parser
+
+1.15.0
+======
+
+New features:
+
+* Fix Github Issue #9: Show list of recent files
+  
+Bug fixes:
+
+* Fix Github Issue #79: What's new view is editable 
+
+1.14.0
+======
+
+New features:
+
+* Add What's New dialog
+  - Help => What's New
+* Fix Github Issue #41: Allow nodes to be resized horizontally
+  - Nodes will now automatically scale also horizontally by the text width
+
+1.13.1
+======
+
+Bug fixes:
+
+* Fix GitHub Issue #75: Unpredictable crash on delete node via context menu
+
+1.13.0
+======
+
+Bug fixes:
+
+* Fix GitHub Issue #72: UTF-8 saving not working (on Windows)
+* Fix GitHub Issue #73: Extra newlines on Windows 
+
+Other:
+
+* Add --debug and turn some info logs into debug logs
+
+1.12.0
+======
+
+New features:
+
+* Fix GitHub Issue #67: Button to drag cards
+
+* Fix GitHub Issue #66: Add fullscreen option
+  * There's now View => Full Screen
+
+* Fix GitHub Issue #51: Insert Images Into Nodes
+  * Node context menu now includes "Attach image" and "Remove attached image"
+  * The attached image will be set as the background image of the node
+  * The image data is embedded in the .ALZ-file
+
+Other:
+
+* Fix GitHub Issue #68: Build .qm-files as part of the build process
+
 1.11.0
 ======
 

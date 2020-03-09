@@ -18,6 +18,7 @@
 #include "constants.hpp"
 #include "node.hpp"
 #include "reader.hpp"
+#include "recent_files_manager.hpp"
 #include "selection_group.hpp"
 #include "serializer.hpp"
 #include "writer.hpp"
@@ -56,6 +57,7 @@ QString EditorData::fileName() const
 
 void EditorData::loadMindMapData(QString fileName)
 {
+    clearImages();
     clearSelectionGroup();
 
     m_selectedEdge = nullptr;
@@ -65,6 +67,7 @@ void EditorData::loadMindMapData(QString fileName)
 #endif
     m_fileName = fileName;
     setIsModified(false);
+    RecentFilesManager::instance().addRecentFile(fileName);
 
     m_undoStack.clear();
 }
@@ -154,6 +157,7 @@ bool EditorData::saveMindMapAs(QString fileName)
     if (Writer::writeToFile(Serializer::toXml(*m_mindMapData), fileName)) {
         m_fileName = fileName;
         setIsModified(false);
+        RecentFilesManager::instance().addRecentFile(fileName);
         return true;
     }
 
@@ -216,6 +220,11 @@ NodePtr EditorData::copyNodeAt(Node & source, QPointF pos)
     node->setLocation(pos);
     m_mindMapData->graph().addNode(node);
     return node;
+}
+
+void EditorData::clearImages()
+{
+    m_mindMapData->imageManager().clear();
 }
 
 void EditorData::clearSelectionGroup()

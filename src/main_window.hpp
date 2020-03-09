@@ -36,6 +36,8 @@ class QSpinBox;
 class QTextEdit;
 class QWidgetAction;
 class Mediator;
+class Node;
+class WhatsNewDlg;
 
 class MainWindow : public QMainWindow
 {
@@ -109,6 +111,8 @@ private slots:
 
     void showAboutQtDlg();
 
+    void showWhatsNewDlg();
+
 private:
     void addRedoAction(QMenu & menu);
 
@@ -136,6 +140,8 @@ private:
 
     AboutDlg * m_aboutDlg;
 
+    WhatsNewDlg * m_whatsNewDlg;
+
     QAction * m_saveAction = nullptr;
 
     QAction * m_saveAsAction = nullptr;
@@ -159,6 +165,8 @@ private:
     const char * m_settingsGroup = "MainWindow";
 
     bool m_closeNow = false;
+
+    QSize m_sizeBeforeFullScreen;
 
     static MainWindow * m_instance;
 };

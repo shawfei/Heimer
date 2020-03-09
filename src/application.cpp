@@ -18,12 +18,15 @@
 #include "editor_data.hpp"
 #include "editor_scene.hpp"
 #include "editor_view.hpp"
+#include "image_manager.hpp"
 #include "main_window.hpp"
 #include "mediator.hpp"
 #include "png_export_dialog.hpp"
+#include "recent_files_manager.hpp"
 #include "state_machine.hpp"
 #include "user_exception.hpp"
 
+#include "argengine.hpp"
 #include "simple_logger.hpp"
 
 #include <QColorDialog>
@@ -39,21 +42,8 @@
 
 namespace {
 
+using juzzlin::Argengine;
 using juzzlin::L;
-
-static void printHelp()
-{
-    std::cout << std::endl
-              << "Heimer version " << VERSION << std::endl;
-    std::cout << Constants::Application::COPYRIGHT << std::endl
-              << std::endl;
-    std::cout << "Usage: heimer [options] [mindMapFile]" << std::endl
-              << std::endl;
-    std::cout << "Options:" << std::endl;
-    std::cout << "--help        Show this help." << std::endl;
-    std::cout << "--lang [lang] Force language: fi, fr, it." << std::endl;
-    std::cout << std::endl;
-}
 
 static void initTranslations(QTranslator & appTranslator, QTranslator & qtTranslator, QGuiApplication & app, QString lang = "")
 {
@@ -82,18 +72,27 @@ static void initTranslations(QTranslator & appTranslator, QTranslator & qtTransl
 
 void Application::parseArgs(int argc, char ** argv)
 {
-    const std::vector<QString> args(argv, argv + argc);
-    for (unsigned int i = 1; i < args.size(); i++) {
-        if (args[i] == "-h" || args[i] == "--help") {
-            printHelp();
-            throw UserException("Exit due to help.");
-        } else if (args[i] == "--lang" && (i + i) < args.size()) {
-            m_lang = args[i + 1];
-            i++;
-        } else {
-            m_mindMapFile = args[i];
-        }
-    }
+    Argengine ae(argc, argv);
+
+    ae.addOption(
+      { "-d", "--debug" }, [] {
+          L::setLoggingLevel(L::Level::Debug);
+      },
+      false, "Show debug logging.");
+
+    ae.addOption(
+      { "--lang" }, [this](std::string value) {
+          m_lang = value.c_str();
+      },
+      false, "Force language: fi, fr, it.");
+
+    ae.setPositionalArgumentCallback([this](Argengine::ArgumentVector args) {
+        m_mindMapFile = args.at(0).c_str();
+    });
+
+    ae.setHelpText(std::string("\nUsage: ") + argv[0] + " [OPTIONS] [MIND_MAP_FILE]");
+
+    ae.parse();
 }
 
 Application::Application(int & argc, char ** argv)
@@ -122,7 +121,10 @@ Application::Application(int & argc, char ** argv)
 
     // Connect views and StateMachine together
     connect(this, &Application::actionTriggered, m_stateMachine.get(), &StateMachine::calculateState);
-    connect(m_editorView, &EditorView::actionTriggered, m_stateMachine.get(), &StateMachine::calculateState);
+    connect(m_editorView, &EditorView::actionTriggered, [this](StateMachine::Action action, Node * node) {
+        m_actionNode = node;
+        m_stateMachine->calculateState(action);
+    });
     connect(m_mainWindow.get(), &MainWindow::actionTriggered, m_stateMachine.get(), &StateMachine::calculateState);
     connect(m_stateMachine.get(), &StateMachine::stateChanged, this, &Application::runState);
 
@@ -153,15 +155,6 @@ QString Application::getFileDialogFileText() const
     return tr("Heimer Files") + " (*" + Constants::Application::FILE_EXTENSION + ")";
 }
 
-QString Application::loadRecentPath() const
-{
-    QSettings settings;
-    settings.beginGroup(m_settingsGroup);
-    const auto path = settings.value("recentPath", QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
-    settings.endGroup();
-    return path;
-}
-
 int Application::run()
 {
     return m_app.exec();
@@ -185,7 +178,10 @@ void Application::runState(StateMachine::State state)
     case StateMachine::State::InitializeNewMindMap:
         m_mediator->initializeNewMindMap();
         break;
-    case StateMachine::State::SaveMindMap:
+    case StateMachine::State::OpenRecent:
+        doOpenMindMap(RecentFilesManager::instance().selectedFile());
+        break;
+    case StateMachine::State::Save:
         saveMindMap();
         break;
     case StateMachine::State::ShowBackgroundColorDialog:
@@ -193,6 +189,9 @@ void Application::runState(StateMachine::State state)
         break;
     case StateMachine::State::ShowEdgeColorDialog:
         showEdgeColorDialog();
+        break;
+    case StateMachine::State::ShowImageFileDialog:
+        showImageFileDialog();
         break;
     case StateMachine::State::ShowPngExportDialog:
         showPngExportDialog();
@@ -298,11 +297,37 @@ void Application::saveMindMapAs()
     }
 }
 
-void Application::saveRecentPath(QString fileName)
+QString Application::loadRecentPath() const
 {
     QSettings settings;
     settings.beginGroup(m_settingsGroup);
-    settings.setValue("recentPath", fileName);
+    const auto path = settings.value("recentPath", QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
+    settings.endGroup();
+    return path;
+}
+
+void Application::saveRecentPath(QString path)
+{
+    QSettings settings;
+    settings.beginGroup(m_settingsGroup);
+    settings.setValue("recentPath", path);
+    settings.endGroup();
+}
+
+QString Application::loadRecentImagePath() const
+{
+    QSettings settings;
+    settings.beginGroup(m_settingsGroup);
+    const QString path = settings.value("recentImagePath", QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
+    settings.endGroup();
+    return path;
+}
+
+void Application::saveRecentImagePath(QString path)
+{
+    QSettings settings;
+    settings.beginGroup(m_settingsGroup);
+    settings.setValue("recentImagePath", path);
     settings.endGroup();
 }
 
@@ -322,6 +347,28 @@ void Application::showEdgeColorDialog()
         m_mediator->setEdgeColor(color);
     }
     emit actionTriggered(StateMachine::Action::EdgeColorChanged);
+}
+
+void Application::showImageFileDialog()
+{
+    const auto path = loadRecentImagePath();
+    const auto extensions = "(*.jpg *.jpeg *.JPG *.JPEG *.png *.PNG)";
+    const auto fileName = QFileDialog::getOpenFileName(
+      m_mainWindow.get(), tr("Open an image"), path, tr("Image Files") + " " + extensions);
+
+    QImage qImage;
+    if (qImage.load(fileName)) {
+        const Image image { qImage, fileName.toStdString() };
+        const auto id = m_editorData->mindMapData()->imageManager().addImage(image);
+        if (m_actionNode) {
+            juzzlin::L().info() << "Setting image id=" << id << " to node " << m_actionNode->index();
+            m_mediator->saveUndoPoint();
+            m_actionNode->setImageRef(id);
+            m_actionNode = nullptr;
+        }
+    } else if (fileName != "") {
+        QMessageBox::critical(m_mainWindow.get(), tr("Load image"), tr("Failed to load image '") + fileName + "'");
+    }
 }
 
 void Application::showPngExportDialog()

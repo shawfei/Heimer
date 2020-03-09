@@ -18,6 +18,7 @@
 #include "constants.hpp"
 #include "edge.hpp"
 #include "graphics_factory.hpp"
+#include "image.hpp"
 #include "layers.hpp"
 #include "node_handle.hpp"
 #include "text_edit.hpp"
@@ -26,6 +27,7 @@
 
 #include <QGraphicsDropShadowEffect>
 #include <QGraphicsSceneHoverEvent>
+#include <QImage>
 #include <QPainter>
 #include <QPen>
 #include <QVector2D>
@@ -52,10 +54,7 @@ Node::Node()
 
     connect(m_textEdit, &TextEdit::textChanged, [=](const QString & text) {
         setText(text);
-
-        if (isTextUnderflowOrOverflow()) {
-            adjustSize();
-        }
+        adjustSize();
     });
 
     connect(m_textEdit, &TextEdit::undoPointRequested, this, &Node::undoPointRequested);
@@ -66,6 +65,11 @@ Node::Node()
     connect(&m_handleVisibilityTimer, &QTimer::timeout, [=]() {
         setHandlesVisible(false, false);
     });
+
+    // Set the background transparent as the TextEdit background will be rendered in Node::paint().
+    // The reason for this is that TextEdit's background affects only the area that includes letters
+    // and we want to render a larger area.
+    m_textEdit->setBackgroundColor({ 0, 0, 0, 0 });
 }
 
 Node::Node(const Node & other)
@@ -74,6 +78,8 @@ Node::Node(const Node & other)
     setColor(other.color());
 
     setCornerRadius(other.cornerRadius());
+
+    setImageRef(other.imageRef());
 
     setIndex(other.index());
 
@@ -93,19 +99,19 @@ void Node::addGraphicsEdge(Edge & edge)
 #ifndef HEIMER_UNIT_TEST
     m_graphicsEdges.push_back(&edge);
 #else
-    Q_UNUSED(edge);
+    Q_UNUSED(edge)
 #endif
 }
 
 void Node::removeGraphicsEdge(Edge & edge)
 {
 #ifndef HEIMER_UNIT_TEST
-    auto iter = std::find(m_graphicsEdges.begin(), m_graphicsEdges.end(), &edge);
+    const auto iter = std::find(m_graphicsEdges.begin(), m_graphicsEdges.end(), &edge);
     if (iter != m_graphicsEdges.end()) {
         m_graphicsEdges.erase(iter);
     }
 #else
-    Q_UNUSED(edge);
+    Q_UNUSED(edge)
 #endif
 }
 
@@ -113,17 +119,21 @@ void Node::adjustSize()
 {
     prepareGeometryChange();
 
-    setSize(QSize(
-      std::max(Constants::Node::MIN_WIDTH, static_cast<int>(m_textEdit->boundingRect().width() + Constants::Node::MARGIN * 2)),
-      std::max(Constants::Node::MIN_HEIGHT, static_cast<int>(m_textEdit->boundingRect().height() + Constants::Node::MARGIN * 2))));
+    const auto margin = Constants::Node::MARGIN * 2;
+    const auto newSize = QSize {
+        std::max(Constants::Node::MIN_WIDTH, static_cast<int>(m_textEdit->boundingRect().width() + margin)),
+        std::max(Constants::Node::MIN_HEIGHT, static_cast<int>(m_textEdit->boundingRect().height() + margin))
+    };
 
-    initTextField();
+    setSize(newSize);
 
     createHandles();
 
     createEdgePoints();
 
     updateEdgeLines();
+
+    initTextField();
 
     update();
 }
@@ -142,7 +152,7 @@ QRectF Node::boundingRect() const
 
 EdgePtr Node::createAndAddGraphicsEdge(NodePtr targetNode)
 {
-    auto edge = std::make_shared<Edge>(*this, *targetNode);
+    const auto edge = std::make_shared<Edge>(*this, *targetNode);
     edge->updateLine();
     m_graphicsEdges.push_back(edge.get());
     return edge;
@@ -175,20 +185,35 @@ void Node::createHandles()
     }
     m_handles.clear();
 
-    auto addHandle = new NodeHandle(*this, NodeHandle::Role::Add, Constants::Node::HANDLE_RADIUS);
+    const auto addHandle = new NodeHandle(*this, NodeHandle::Role::Add, Constants::Node::HANDLE_RADIUS);
     addHandle->setParentItem(this);
     addHandle->setPos({ 0, size().height() * 0.5 });
     m_handles.push_back(addHandle);
 
-    auto colorHandle = new NodeHandle(*this, NodeHandle::Role::Color, Constants::Node::HANDLE_RADIUS_SMALL);
+    const auto colorHandle = new NodeHandle(*this, NodeHandle::Role::Color, Constants::Node::HANDLE_RADIUS_SMALL);
     colorHandle->setParentItem(this);
     colorHandle->setPos({ size().width() * 0.5, size().height() * 0.5 - Constants::Node::HANDLE_RADIUS_SMALL * 0.5 });
     m_handles.push_back(colorHandle);
 
-    auto textColorHandle = new NodeHandle(*this, NodeHandle::Role::TextColor, Constants::Node::HANDLE_RADIUS_SMALL);
+    const auto textColorHandle = new NodeHandle(*this, NodeHandle::Role::TextColor, Constants::Node::HANDLE_RADIUS_SMALL);
     textColorHandle->setParentItem(this);
     textColorHandle->setPos({ size().width() * 0.5, -size().height() * 0.5 + Constants::Node::HANDLE_RADIUS_SMALL * 0.5 });
     m_handles.push_back(textColorHandle);
+
+    const auto dragHandle = new NodeHandle(*this, NodeHandle::Role::Drag, Constants::Node::HANDLE_RADIUS_MEDIUM);
+    dragHandle->setParentItem(this);
+    dragHandle->setPos({ -size().width() * 0.5 - Constants::Node::HANDLE_RADIUS_SMALL * 0.15, -size().height() * 0.5 - Constants::Node::HANDLE_RADIUS_SMALL * 0.15 });
+    m_handles.push_back(dragHandle);
+}
+
+QRectF Node::expandedTextEditRect() const
+{
+    auto textEditRect = QRectF {};
+    textEditRect.setX(m_textEdit->pos().x());
+    textEditRect.setY(m_textEdit->pos().y());
+    textEditRect.setWidth(size().width() - Constants::Node::MARGIN * 2);
+    textEditRect.setHeight(m_textEdit->boundingRect().height());
+    return textEditRect;
 }
 
 std::pair<EdgePoint, EdgePoint> Node::getNearestEdgePoints(const Node & node1, const Node & node2)
@@ -197,10 +222,9 @@ std::pair<EdgePoint, EdgePoint> Node::getNearestEdgePoints(const Node & node1, c
     std::pair<EdgePoint, EdgePoint> bestPair = { EdgePoint(), EdgePoint() };
 
     // This is O(n^2) but fine as there are not many points
-    for (const auto & point1 : node1.m_edgePoints) {
-        for (const auto & point2 : node2.m_edgePoints) {
+    for (auto && point1 : node1.m_edgePoints) {
+        for (auto && point2 : node2.m_edgePoints) {
             const auto distance = std::pow(node1.pos().x() + point1.location.x() - node2.pos().x() - point2.location.x(), 2) + std::pow(node1.pos().y() + point1.location.y() - node2.pos().y() - point2.location.y(), 2);
-
             if (distance < bestDistance) {
                 bestDistance = distance;
                 bestPair = { point1, point2 };
@@ -251,6 +275,18 @@ void Node::hoverMoveEvent(QGraphicsSceneHoverEvent * event)
     }
 }
 
+void Node::mousePressEvent(QGraphicsSceneMouseEvent * event)
+{
+    if (index() != -1) // Prevent left-click on the drag node
+    {
+        if (expandedTextEditRect().contains(event->pos())) {
+            m_textEdit->setFocus();
+        }
+
+        QGraphicsItem::mousePressEvent(event);
+    }
+}
+
 void Node::checkHandleVisibility(QPointF pos)
 {
     // Bounding box without children
@@ -268,7 +304,7 @@ void Node::checkHandleVisibility(QPointF pos)
 
 NodeHandle * Node::hitsHandle(QPointF pos)
 {
-    for (auto handle : m_handles) {
+    for (auto && handle : m_handles) {
         if (handle->contains(pos)) {
             return handle;
         }
@@ -280,34 +316,58 @@ NodeHandle * Node::hitsHandle(QPointF pos)
 void Node::initTextField()
 {
 #ifndef HEIMER_UNIT_TEST
-    m_textEdit->setTextWidth(size().width() - Constants::Node::MARGIN * 2);
-    m_textEdit->setPos(-m_textEdit->textWidth() * 0.5, -size().height() * 0.5 + Constants::Node::MARGIN);
-    m_textEdit->setMaxHeight(size().height() - Constants::Node::MARGIN * 4);
-    m_textEdit->setMaxWidth(size().width() - Constants::Node::MARGIN * 2);
+    m_textEdit->setTextWidth(-1);
+    m_textEdit->setPos(-size().width() * 0.5 + Constants::Node::MARGIN, -size().height() * 0.5 + Constants::Node::MARGIN);
 #endif
 }
 
-bool Node::isTextUnderflowOrOverflow() const
+void Node::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
-    const double tolerance = 0.001;
-    return m_textEdit->boundingRect().height() > m_textEdit->maxHeight() + tolerance || m_textEdit->boundingRect().width() > m_textEdit->maxWidth() + tolerance || m_textEdit->boundingRect().height() < m_textEdit->maxHeight() - tolerance || m_textEdit->boundingRect().width() < m_textEdit->maxWidth() - tolerance;
-}
-
-void Node::paint(QPainter * painter,
-                 const QStyleOptionGraphicsItem * option, QWidget * widget)
-{
-    Q_UNUSED(widget);
-    Q_UNUSED(option);
+    Q_UNUSED(widget)
+    Q_UNUSED(option)
 
     painter->save();
 
     // Background
 
     QPainterPath path;
-    QRectF rect(-size().width() / 2, -size().height() / 2, size().width(), size().height());
+    const QRectF rect(-size().width() / 2, -size().height() / 2, size().width(), size().height());
     path.addRoundedRect(rect, cornerRadius(), cornerRadius());
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->fillPath(path, QBrush(color()));
+
+    if (!m_pixmap.isNull()) {
+        QPixmap scaledPixmap(static_cast<int>(size().width()), static_cast<int>(size().height()));
+        scaledPixmap.fill(Qt::transparent);
+        QPainter pixmapPainter(&scaledPixmap);
+        QPainterPath scaledPath;
+        const QRectF scaledRect(0, 0, size().width(), size().height());
+        scaledPath.addRoundedRect(scaledRect, cornerRadius(), cornerRadius());
+
+        const auto pixmapAspect = static_cast<double>(m_pixmap.width()) / m_pixmap.height();
+        const auto nodeAspect = size().width() / size().height();
+        if (nodeAspect > 1.0) {
+            if (pixmapAspect > nodeAspect) {
+                pixmapPainter.fillPath(scaledPath, QBrush(m_pixmap.scaledToHeight(static_cast<int>(size().height()))));
+            } else {
+                pixmapPainter.fillPath(scaledPath, QBrush(m_pixmap.scaledToWidth(static_cast<int>(size().width()))));
+            }
+        } else {
+            if (pixmapAspect < nodeAspect) {
+                pixmapPainter.fillPath(scaledPath, QBrush(m_pixmap.scaledToWidth(static_cast<int>(size().width()))));
+            } else {
+                pixmapPainter.fillPath(scaledPath, QBrush(m_pixmap.scaledToHeight(static_cast<int>(size().height()))));
+            }
+        }
+
+        painter->drawPixmap(rect, scaledPixmap, scaledRect);
+    } else {
+        painter->fillPath(path, QBrush(color()));
+    }
+
+    // Patch for TextEdit
+
+    painter->fillRect(expandedTextEditRect(), Constants::Node::TEXT_EDIT_BACKGROUND_COLOR);
+
     painter->restore();
 }
 
@@ -335,11 +395,11 @@ void Node::setCornerRadius(int value)
 void Node::setHandlesVisible(bool visible, bool all)
 {
     if (all) {
-        for (auto handle : m_handles) {
+        for (auto && handle : m_handles) {
             handle->setVisible(visible);
         }
     } else {
-        for (auto handle : m_handles) {
+        for (auto && handle : m_handles) {
             if (!visible) {
                 if (!handle->contains(m_currentMousePos)) {
                     handle->setVisible(visible);
@@ -382,9 +442,7 @@ void Node::setText(const QString & text)
         NodeBase::setText(text);
         m_textEdit->setText(text);
 
-        if (isTextUnderflowOrOverflow()) {
-            adjustSize();
-        }
+        adjustSize();
     }
 }
 
@@ -401,9 +459,7 @@ void Node::setTextSize(int textSize)
 {
     m_textEdit->setTextSize(textSize);
 
-    if (isTextUnderflowOrOverflow()) {
-        adjustSize();
-    }
+    adjustSize();
 }
 
 QString Node::text() const
@@ -411,11 +467,34 @@ QString Node::text() const
     return m_textEdit->text();
 }
 
+void Node::setImageRef(size_t imageRef)
+{
+    if (imageRef) {
+        NodeBase::setImageRef(imageRef);
+        emit imageRequested(imageRef, *this);
+    } else {
+        if (NodeBase::imageRef()) {
+            NodeBase::setImageRef(imageRef);
+            applyImage(Image {});
+        }
+    }
+}
+
+void Node::applyImage(const Image & image)
+{
+    m_pixmap = QPixmap::fromImage(image.image());
+
+    update();
+}
+
 void Node::updateEdgeLines()
 {
-    for (auto edge : m_graphicsEdges) {
+    for (auto && edge : m_graphicsEdges) {
         edge->updateLine();
     }
 }
 
-Node::~Node() = default;
+Node::~Node()
+{
+    juzzlin::L().debug() << "Deleting Node " << index();
+}

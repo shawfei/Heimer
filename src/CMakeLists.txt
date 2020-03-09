@@ -1,5 +1,18 @@
-add_subdirectory(contrib/SimpleLogger)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/contrib/SimpleLogger/src)
+add_subdirectory(contrib/SimpleLogger EXCLUDE_FROM_ALL)
+include_directories(contrib/SimpleLogger/src)
+
+add_subdirectory(contrib/Argengine EXCLUDE_FROM_ALL)
+include_directories(contrib/Argengine/src)
+
+# Translation files in src/translations (without .ts)
+set(TS heimer_fi heimer_fr heimer_it)
+set(TS_FILES)
+set(QM_FILES)
+foreach(TS_FILE ${TS})
+    list(APPEND TS_FILES ${CMAKE_SOURCE_DIR}/src/translations/${TS_FILE}.ts)
+    list(APPEND QM_FILES ${CMAKE_BINARY_DIR}/data/translations/${TS_FILE}.qm)
+endforeach()
+set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION ${CMAKE_BINARY_DIR}/data/translations)
 
 # Set sources
 set(SRC
@@ -21,6 +34,8 @@ set(SRC
     editor_data.cpp
     editor_scene.cpp
     editor_view.cpp
+    image.cpp
+    image_manager.cpp
     png_export_dialog.cpp
     main.cpp
     main_context_menu.cpp
@@ -34,6 +49,8 @@ set(SRC
     node_base.cpp
     node_handle.cpp
     reader.cpp
+    recent_files_manager.cpp
+    recent_files_menu.cpp
     selection_group.cpp
     serializer.cpp
     state_machine.cpp
@@ -41,13 +58,19 @@ set(SRC
     undo_stack.cpp
     user_exception.hpp
     layers.hpp
+    whats_new_dlg.cpp
     writer.cpp
 )
 
+# Need to copy the QRC file to binary dir where the QM-files will be generated.
+# This is because the paths in translations.qrc are relative to itself.
+configure_file(${CMAKE_SOURCE_DIR}/data/translations/translations.qrc ${CMAKE_BINARY_DIR}/data/translations/translations.qrc COPYONLY)
+
 set(RCS
+    ${CMAKE_SOURCE_DIR}/meta.qrc
     ${CMAKE_SOURCE_DIR}/data/images/images.qrc
     ${CMAKE_SOURCE_DIR}/data/icons/icons.qrc
-    ${CMAKE_SOURCE_DIR}/data/translations/translations.qrc
+    ${CMAKE_BINARY_DIR}/data/translations/translations.qrc
 )
 
 qt5_add_resources(RC_SRC ${RCS})
@@ -86,4 +109,4 @@ endif()
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 add_executable(${BINARY_NAME} WIN32 ${SRC} ${MOC_SRC} ${RC_SRC} ${UI_HDRS} ${QM})
 
-target_link_libraries(${BINARY_NAME} Qt5::Widgets Qt5::Xml SimpleLogger)
+target_link_libraries(${BINARY_NAME} Qt5::Widgets Qt5::Xml SimpleLogger_static Argengine_static)

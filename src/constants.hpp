@@ -26,7 +26,7 @@ static constexpr auto APPLICATION_NAME = "Heimer";
 
 static constexpr auto APPLICATION_VERSION = VERSION;
 
-static constexpr auto COPYRIGHT = "Copyright (c) 2018 Jussi Lind";
+static constexpr auto COPYRIGHT = "Copyright (c) 2018-2020 Jussi Lind";
 
 static constexpr auto FILE_EXTENSION = ".alz";
 
@@ -38,7 +38,7 @@ static constexpr auto QSETTINGS_SOFTWARE_NAME = APPLICATION_NAME;
 
 static constexpr auto SUPPORT_SITE_URL = "https://www.patreon.com/juzzlin";
 
-static constexpr auto TRANSLATIONS_RESOURCE_BASE = ":/heimer_";
+static constexpr auto TRANSLATIONS_RESOURCE_BASE = ":/translations/heimer_";
 
 } // namespace Application
 
@@ -94,7 +94,7 @@ static const int MAX_SIZE = 500;
 
 namespace MindMap {
 
-static const QColor DEFAULT_BACKGROUND_COLOR { 0x80, 0xc8, 0xff };
+static const QColor DEFAULT_BACKGROUND_COLOR { 0xba, 0xbd, 0xb6 };
 
 static const QColor DEFAULT_EDGE_COLOR { 0, 0, 0, 200 };
 
@@ -114,6 +114,8 @@ static const double HANDLE_OPACITY = 0.8;
 
 static const int HANDLE_RADIUS = 28;
 
+static const int HANDLE_RADIUS_MEDIUM = 24;
+
 static const int HANDLE_RADIUS_SMALL = 20;
 
 static const int MARGIN = 10;
@@ -124,7 +126,19 @@ static const int MIN_HEIGHT = 75;
 
 static const int MIN_WIDTH = 200;
 
+static const QColor TEXT_EDIT_BACKGROUND_COLOR { 0x00, 0x00, 0x00, 0x10 };
+
 } // namespace Node
+
+namespace RecentFiles {
+
+static const int MAX_FILES = 8;
+
+static const QString QSETTINGS_ARRAY_KEY = "recentFilesArray";
+
+static const QString QSETTINGS_FILE_PATH_KEY = "filePath";
+
+} // namespace RecentFiles
 
 namespace Scene {
 

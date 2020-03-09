@@ -2,7 +2,7 @@
 
 # Builds AppImage in Docker
 
-HEIMER_VERSION=1.11.0
+HEIMER_VERSION=1.15.1
 
 CMD="export LANG=en_US.UTF-8 && \
      export LC_ALL=en_US.UTF-8 && \
@@ -24,6 +24,6 @@ if [ -f /.dockerenv ]; then
     bash -c "${CMD}"
 else
     echo "Script outside Docker"
-    docker run --privileged -t -v $(pwd):/heimer juzzlin/qt5:14.04 bash -c "${CMD}"
+    docker run --privileged -t -v $(pwd):/heimer juzzlin/qt5-14.04:latest bash -c "${CMD}"
 fi
 

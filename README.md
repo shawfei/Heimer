@@ -4,7 +4,7 @@ Heimer is a desktop application for creating mind maps and other suitable diagra
 
 Here is a simple mind map of Heimer itself running on Ubuntu 18.04:
 
-![Heimer screenshot](/screenshots/1.2.0/Heimer.png?raw=true)
+![Heimer screenshot](/screenshots/1.14.0/Heimer.png?raw=true)
 
 <a href="https://www.youtube.com/watch?feature=player_embedded&v=NXJp6tmmZdE">A very short introduction video to Heimer 1.9.0</a>
 
@@ -45,8 +45,9 @@ Snap is the recommended way to install Heimer on Linux.
 
 ## Building the project
 
-Please refer to the INSTALL document for build/install instructions if you're
-going to build Heimer from sources.
+Currently the build depends on `Qt5` only (`qt5-default`, `qttools5-dev-tools`, `qttools-dev` packages on Ubuntu).
+
+The "official" build system for Linux is `CMake` although `qmake` project files are also provided.
 
 Building for Linux in a nutshell:
 
@@ -54,9 +55,21 @@ Building for Linux in a nutshell:
 
 `$ cmake ..`
 
-`$ make`
+`$ make -j4`
+
+Run unit tests:
+
+`$ ctest`
+
+Install locally:
 
 `$ sudo make install`
+
+Debian package (`.deb`) can be created like this:
+
+`$ cpack -G DEB`
+
+See `Jenkinsfile` on how to build other packages in Docker.
 
 ## Donations
 
